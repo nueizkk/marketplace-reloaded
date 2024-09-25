@@ -1,3 +1,4 @@
+import { ExclamationCircleIcon } from '@heroicons/react/16/solid';
 import type { InputHTMLAttributes } from 'react';
 
 interface InputProps {
@@ -18,7 +19,11 @@ export default function Input({
         {...rest}
       />
       {errors.map((error, index) => (
-        <span key={index} className='text-red-500 font-medium text-xs'>
+        <span
+          key={index}
+          className='text-red-500 font-medium text-xs flex gap-1'
+        >
+          <ExclamationCircleIcon width={14} height={14} />
           {error}
         </span>
       ))}
