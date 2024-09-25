@@ -11,14 +11,14 @@ export default function SMSLogin() {
       <form className='flex flex-col gap-3'>
         <FormInput
           type='number'
-          name='phone-number'
+          name='phone_number'
           placeholder='Phone number'
           required
           errors={[]}
         />
         <FormInput
           type='number'
-          name='verification-code'
+          name='verification_code'
           placeholder='Verification code'
           required
           errors={[]}
