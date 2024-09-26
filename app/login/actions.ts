@@ -1,6 +1,31 @@
 'use server';
 import { type typeToFlattenedError, z } from 'zod';
 import { PASSWORD_MIN_LENGTH, PASSWORD_REGEX } from '@lib/constants';
+import db from '@lib/db';
+import bcrypt from 'bcrypt';
+import { redirect } from 'next/navigation';
+
+const checkEmailExists = async (email: string) => {
+  const user = await db.user.findUnique({
+    where: { email },
+    select: { id: true },
+  });
+  return Boolean(user);
+};
+
+const checkEmailPasswordMatch = async ({
+  email,
+  password,
+}: {
+  email: string;
+  password: string;
+}) => {
+  const user = await db.user.findUnique({
+    where: { email },
+    select: { id: true, password: true },
+  });
+  return await bcrypt.compare(password, user!.password ?? '');
+};
 
 const formSchema = z.object({
   email: z
@@ -8,7 +33,7 @@ const formSchema = z.object({
       invalid_type_error: '문자로 입력해주세요.',
       required_error: '이메일을 입력해주세요.',
     })
-    .email()
+    .email('이메일 형식이 올바르지 않습니다.')
     .toLowerCase(),
   password: z
     .string({
@@ -22,6 +47,21 @@ const formSchema = z.object({
     ),
 });
 
+const formSchema2 = z.object({
+  email: z.string().refine(checkEmailExists, '등록되지 않은 이메일입니다.'),
+  password: z.string(),
+});
+
+const formSchema3 = z
+  .object({
+    email: z.string(),
+    password: z.string(),
+  })
+  .refine(checkEmailPasswordMatch, {
+    message: '이메일과 비밀번호가 일치하지 않습니다.',
+    path: ['password'],
+  });
+
 export async function login(
   prevState:
     | undefined
@@ -34,10 +74,23 @@ export async function login(
     password: formData.get('password'),
   };
 
-  const result = formSchema.safeParse(data);
+  const result = await formSchema.spa(data);
   if (!result.success) {
     return result.error.flatten();
   } else {
-    console.log(result.data);
+    // check if the email exists
+    const result2 = await formSchema2.spa(result.data);
+    if (!result2.success) {
+      return result2.error.flatten();
+    } else {
+      // check if the email matches the password
+      const result3 = await formSchema3.spa(result2.data);
+      if (!result3.success) {
+        return result3.error.flatten();
+      } else {
+        // log the user in -> redirect("/profile")
+        redirect('/profile');
+      }
+    }
   }
 }
