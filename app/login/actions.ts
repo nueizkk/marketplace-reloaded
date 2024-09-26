@@ -4,6 +4,7 @@ import { PASSWORD_MIN_LENGTH, PASSWORD_REGEX } from '@lib/constants';
 import db from '@lib/db';
 import bcrypt from 'bcrypt';
 import { redirect } from 'next/navigation';
+import getSession from '@lib/session';
 
 const checkEmailExists = async (email: string) => {
   const user = await db.user.findUnique({
@@ -11,20 +12,6 @@ const checkEmailExists = async (email: string) => {
     select: { id: true },
   });
   return Boolean(user);
-};
-
-const checkEmailPasswordMatch = async ({
-  email,
-  password,
-}: {
-  email: string;
-  password: string;
-}) => {
-  const user = await db.user.findUnique({
-    where: { email },
-    select: { id: true, password: true },
-  });
-  return await bcrypt.compare(password, user!.password ?? '');
 };
 
 const formSchema = z.object({
@@ -52,21 +39,17 @@ const formSchema2 = z.object({
   password: z.string(),
 });
 
-const formSchema3 = z
-  .object({
-    email: z.string(),
-    password: z.string(),
-  })
-  .refine(checkEmailPasswordMatch, {
-    message: '이메일과 비밀번호가 일치하지 않습니다.',
-    path: ['password'],
-  });
-
 export async function login(
   prevState:
     | undefined
     | null
-    | typeToFlattenedError<{ email: string; password: string }>,
+    | typeToFlattenedError<{ email: string; password: string }>
+    | {
+        fieldErrors: {
+          email: string[];
+          password: string[];
+        };
+      },
   formData: FormData
 ) {
   const data = {
@@ -83,12 +66,29 @@ export async function login(
     if (!result2.success) {
       return result2.error.flatten();
     } else {
-      // check if the email matches the password
-      const result3 = await formSchema3.spa(result2.data);
-      if (!result3.success) {
-        return result3.error.flatten();
+      // // check if the email matches the password
+      const user = await db.user.findUnique({
+        where: { email: result2.data.email },
+        select: { id: true, password: true },
+      });
+
+      const ok = await bcrypt.compare(
+        result2.data.password,
+        user!.password ?? ''
+      );
+
+      if (!ok) {
+        return {
+          fieldErrors: {
+            email: [],
+            password: ['이메일과 비밀번호가 일치하지 않습니다.'],
+          },
+        };
       } else {
-        // log the user in -> redirect("/profile")
+        const session = await getSession();
+        session.id = user!.id;
+        session.save();
+
         redirect('/profile');
       }
     }
