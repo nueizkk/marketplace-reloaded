@@ -7,7 +7,8 @@ import bcrypt from 'bcrypt';
 import { redirect } from 'next/navigation';
 import { signIn } from '@lib/session';
 
-const checkUsername = (username: string) => !username.startsWith('gh-');
+const checkUsername = (username: string) =>
+  !username.startsWith('gh-') && !username.startsWith('sms-');
 
 const checkPassword = ({
   password,
@@ -26,7 +27,10 @@ const formSchema = z
       })
       .trim()
       .toLowerCase()
-      .refine(checkUsername, `이름은 'gh-'으로 시작할 수 없습니다.`),
+      .refine(
+        checkUsername,
+        `이름은 'gh-' 또는 'sms-'으로 시작할 수 없습니다.`
+      ),
     email: z
       .string({
         invalid_type_error: '문자로 입력해주세요.',

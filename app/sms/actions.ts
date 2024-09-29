@@ -6,6 +6,7 @@ import db from '@lib/db';
 import crypto from 'crypto';
 import { signIn } from '@lib/session';
 import twilio from 'twilio';
+import { getUniqueUsername } from '@lib/utils';
 
 const phoneSchema = z
   .string()
@@ -64,8 +65,7 @@ export async function smsLogin(
             connectOrCreate: {
               where: { phone: result.data },
               create: {
-                // TODO: username 중복체크
-                username: crypto.randomBytes(10).toString('hex'),
+                username: await getUniqueUsername(result.data + token, 'sms'),
                 phone: result.data,
               },
             },
