@@ -5,9 +5,9 @@ import { PASSWORD_MIN_LENGTH, PASSWORD_REGEX } from '@lib/constants';
 import db from '@lib/db';
 import bcrypt from 'bcrypt';
 import { redirect } from 'next/navigation';
-import getSession from '@lib/session';
+import { signIn } from '@lib/session';
 
-const checkUsername = (username: string) => !username.startsWith('admin');
+const checkUsername = (username: string) => !username.startsWith('gh-');
 
 const checkPassword = ({
   password,
@@ -26,7 +26,7 @@ const formSchema = z
       })
       .trim()
       .toLowerCase()
-      .refine(checkUsername, '이름은 admin으로 시작할 수 없습니다.'),
+      .refine(checkUsername, `이름은 'gh-'으로 시작할 수 없습니다.`),
     email: z
       .string({
         invalid_type_error: '문자로 입력해주세요.',
@@ -129,11 +129,7 @@ export async function createAccount(
     });
 
     // log the user in: npm i iron-session (암호화, 복호화)
-    const session = await getSession();
-    session.id = user.id;
-    await session.save();
-
-    // redirect "/profile"
+    await signIn(user.id);
     redirect('/profile');
   }
 }

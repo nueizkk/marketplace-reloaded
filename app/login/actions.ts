@@ -4,7 +4,7 @@ import { PASSWORD_MIN_LENGTH, PASSWORD_REGEX } from '@lib/constants';
 import db from '@lib/db';
 import bcrypt from 'bcrypt';
 import { redirect } from 'next/navigation';
-import getSession from '@lib/session';
+import { signIn } from '@lib/session';
 
 const checkEmailExists = async (email: string) => {
   const user = await db.user.findUnique({
@@ -85,10 +85,7 @@ export async function login(
           },
         };
       } else {
-        const session = await getSession();
-        session.id = user!.id;
-        session.save();
-
+        await signIn(user!.id);
         redirect('/profile');
       }
     }
