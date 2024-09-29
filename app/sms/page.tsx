@@ -4,7 +4,11 @@ import Button from '@/components/button';
 import { useFormState } from 'react-dom';
 import { smsLogin } from './actions';
 
-const initialState = { token: false, error: undefined };
+const initialState = {
+  token: false,
+  phone: '',
+  error: undefined,
+};
 
 export default function SMSLogin() {
   const [state, action] = useFormState(smsLogin, initialState);
@@ -15,7 +19,7 @@ export default function SMSLogin() {
         <h2 className='text-xl'>Verify your phone number.</h2>
       </div>
       <form action={action} className='flex flex-col gap-3'>
-        {state.token ? (
+        {state?.token ? (
           <Input
             key='token'
             name='token'
@@ -23,7 +27,7 @@ export default function SMSLogin() {
             inputMode='numeric'
             placeholder='Verification code'
             required
-            errors={state.error?.formErrors}
+            errors={state?.error?.formErrors}
           />
         ) : (
           <Input
@@ -33,11 +37,13 @@ export default function SMSLogin() {
             inputMode='numeric'
             placeholder='Phone number'
             required
-            errors={state.error?.formErrors}
+            errors={state?.error?.formErrors}
           />
         )}
 
-        <Button text={state.token ? 'Verify Token' : 'Send Verification SMS'} />
+        <Button
+          text={state?.token ? 'Verify Token' : 'Send Verification SMS'}
+        />
       </form>
     </div>
   );
