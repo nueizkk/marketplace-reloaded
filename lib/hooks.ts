@@ -36,7 +36,7 @@ export function useInfiniteScroll<T>(
     return () => {
       observer.disconnect();
     };
-  }, [page]);
+  }, [page, getMoreItems]);
 
   return { items, trigger, hasNext };
 }
