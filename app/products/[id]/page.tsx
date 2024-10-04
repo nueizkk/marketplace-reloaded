@@ -71,7 +71,7 @@ export default async function ProductDetail({
         <h1 className='text-2xl font-semibold'>{product.title}</h1>
         <p>{product.description}</p>
       </div>
-      <div className='fixed w-full bottom-0 max-w-sm p-5 pb-10 bg-neutral-800 flex justify-between items-center'>
+      <div className='fixed bottom-0 app-w p-5 pb-10 bg-neutral-800 flex justify-between items-center'>
         <span className='font-semibold text-lg'>
           {formatToWon(product.price)}원
         </span>
