@@ -10,8 +10,6 @@ export function useInfiniteScroll<T>(
   const trigger = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!hasNext) return;
-
     const observer = new IntersectionObserver(
       async (entries) => {
         const element = entries[0];
