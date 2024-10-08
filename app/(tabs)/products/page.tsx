@@ -31,7 +31,7 @@ export default async function Products() {
   return (
     <div>
       <ProductList initialProducts={initialProducts} />
-      <div className='fixed bottom-28 app-w flex justify-end pointer-events-none'>
+      <div className='fixed left-auto bottom-28 app-w flex justify-end pointer-events-none'>
         <Link
           href={`/products/add`}
           className='primary-btn size-14 rounded-full flex justify-center items-center pointer-events-auto'
