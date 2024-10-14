@@ -5,6 +5,15 @@ import { formatToWon } from '@lib/utils';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { unstable_cache as nextCache } from 'next/cache';
+import { REVALIDATE_TIME } from '@lib/constants';
+
+interface ProductDetailProps {
+  params: {
+    id: string;
+  };
+  isModal?: boolean;
+}
 
 async function getIsOwner(userId: number): Promise<boolean> {
   const session = await getSession();
@@ -25,12 +34,9 @@ async function getProduct(id: number) {
   });
 }
 
-interface ProductDetailProps {
-  params: {
-    id: string;
-  };
-  isModal?: boolean;
-}
+export const getCachedProduct = nextCache(getProduct, ['product-detail'], {
+  revalidate: REVALIDATE_TIME,
+});
 
 export default async function ProductDetail({
   params,
@@ -40,7 +46,7 @@ export default async function ProductDetail({
   if (isNaN(id)) {
     return notFound();
   }
-  const product = await getProduct(id);
+  const product = await getCachedProduct(id);
   if (!product) {
     return notFound();
   }
