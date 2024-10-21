@@ -20,7 +20,7 @@
 
 @layer utilities {
   .app-w {
-    @apply w-full max-w-md mx-auto;
+    @apply w-full max-w-lg mx-auto;
   }
 }
 
