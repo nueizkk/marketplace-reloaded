@@ -4,6 +4,8 @@ import fs from 'fs/promises';
 import db from '@lib/db';
 import { getSession } from '@lib/session';
 import { redirect } from 'next/navigation';
+import { File } from 'buffer';
+import { revalidatePath } from 'next/cache';
 
 const productSchema = z.object({
   photo: z
@@ -59,6 +61,7 @@ export async function uploadProduct(
         },
         select: { id: true },
       });
+      revalidatePath('/products');
       redirect(`/products/${product.id}`);
     }
   }
